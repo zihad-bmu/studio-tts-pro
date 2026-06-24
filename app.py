@@ -42,18 +42,14 @@ st.title("🎙️ Studio-Quality Multi-Language Voice Generator")
 st.subheader("Bengali & English Podcast & Audiobook Production Engine (with Advanced AI Voice Enhancer)")
 st.markdown("---")
 
-def _get_secret(key):
-    try:
-        return st.secrets.get(key)
-    except Exception:
-        return None
+# SECURE API KEY MANAGEMENT: Fetches from Secrets config or environment variables safely
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
 
-GEMINI_API_KEY = (
-    os.environ.get("GEMINI_API_KEY")
-    or _get_secret("GEMINI_API_KEY")
-    or "AQ.Ab8RN6ISbcNHh4lnQcF7ksvYmmV628mtiVJOUuT0UyzDxDeh0w"
-)
-genai.configure(api_key=GEMINI_API_KEY)
+if not GEMINI_API_KEY:
+    st.error("🔑 Gemini API Key not found! Please add it to your Streamlit Secrets or Environment Variables to use Gemini Modes.")
+    st.info("💡 Tip: You can still use 'Direct Microsoft TTS' without an API key by switching the mode in the sidebar.")
+else:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # Sidebar Configuration Panel
 st.sidebar.header("🌐 Global Settings")
@@ -271,6 +267,8 @@ async def generate_multilang_tts(segments, voice, base_speed, base_pitch, pause_
 if st.button("🚀 Generate Studio-Quality Audio", type="primary"):
     if not text_input.strip():
         st.error("❌ Please input some text/script to process!")
+    elif "Direct Microsoft" not in engine_option and not GEMINI_API_KEY:
+        st.error("🚨 Gemini API Key is missing! Please configure secrets or use 'Direct Microsoft TTS' mode.")
     elif "Direct Microsoft" not in engine_option and remaining_req <= 0:
         st.error(f"🚨 Free daily quota reached for {current_model_id}! Please switch to 'Direct Microsoft TTS' mode.")
     else:
