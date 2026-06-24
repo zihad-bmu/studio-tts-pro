@@ -2,4 +2,3 @@ streamlit
 google-generativeai
 edge-tts
 pydub
-pyaudioop
